@@ -1,26 +1,34 @@
-# QA Selenium Automation with Python
+import time
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+import pytest
 
-## Objective
-Create a Selenium automation script in Python to validate search functionality on the **Selenium Playground** website.
 
-> [!NOTE]
-> **Deliverables:**
-> 1. A Python script (`qa_selenium_test.py`) that:
->    - Navigates to the [Selenium Playground Table Search Demo](https://www.lambdatest.com/selenium-playground/table-sort-search-demo).
->    - Locates and interacts with the search box to search for "New York".
->    - Validates that the search results show **5 entries out of 24 total entries**.
-> 2. A brief **README** explaining the approach and how to run the script.
-> 3. Any additional setup instructions (e.g., local environment, dependencies, drivers etc).
+@pytest.fixture(scope="module")
+def driver():
+    driver = webdriver.Chrome(executable_path='/path/to/chromedriver')  
+    driver.get("https://www.lambdatest.com/selenium-playground/table-sort-search-demo")
+    yield driver
+    driver.quit()
 
-> [!TIP]
-> Use Python's `pytest` framework to structure your test cases.
+def test_search_table(driver):
+  
+    search_box = driver.find_element(By.ID, "task-table-filter")
+    search_box.clear()  
+    search_box.send_keys("New York")
+    search_box.send_keys(Keys.RETURN)
 
-> [!IMPORTANT]
-> - **Environment Setup:** Follow good coding practices and ensure the script is compatible with the latest stable Selenium version.
-> - **Browser Compatibility:** Test with at least one major browser (e.g., Chrome, Firefox).
+ 
+    time.sleep(2)  
+    
+    
+    rows = driver.find_elements(By.XPATH, "//table[@id='task-table']//tbody//tr")
+    total_entries = len(rows)
+    
+        assert total_entries == 5, f"Expected 5 entries, but found {total_entries} entries."
+    print(f"Test Passed! Found {total_entries} entries matching 'New York'.")
 
-> [!CAUTION]
-> - **Assertions:** Ensure all validations use robust assertion statements.
-> - **Code Quality:** Follow PEP8 standards for Python code.
 
-**Good luck!**
+if __name__ == "__main__":
+    pytest.main()
